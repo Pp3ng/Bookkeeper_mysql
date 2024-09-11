@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <regex>
+#include <limits>
 
 void showMainMenu()
 {
@@ -72,7 +73,11 @@ std::string get_current_date()
 
 bool is_valid_amount(double amount)
 {
-    return amount > 0;
+    if (amount < std::numeric_limits<double>::lowest() || amount > std::numeric_limits<double>::max())
+    {
+        return false;
+    }
+    return true;
 }
 
 bool is_valid_date(const std::string &date)
@@ -175,12 +180,66 @@ void insert_transaction(MYSQL *con, const std::string &description, double amoun
 
 void delete_transaction(MYSQL *con, int id)
 {
-    std::string query = "DELETE FROM transactions WHERE id = " + std::to_string(id);
-    if (mysql_query(con, query.c_str()))
+    std::string query = "DELETE FROM transactions WHERE id = ?";
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt)
     {
         finish_with_error(con);
     }
-    std::cout << "Transaction deleted successfully." << std::endl;
+
+    if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+    {
+        finish_with_error(con);
+    }
+
+    MYSQL_BIND bind[1];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_LONG;
+    bind[0].buffer = (char *)&id;
+    bind[0].buffer_length = sizeof(id);
+
+    if (mysql_stmt_bind_param(stmt, bind))
+    {
+        finish_with_error(con);
+    }
+
+    if (mysql_stmt_execute(stmt))
+    {
+        finish_with_error(con);
+    }
+
+    mysql_stmt_close(stmt);
+
+    // Start transaction
+    if (mysql_query(con, "START TRANSACTION;"))
+    {
+        finish_with_error(con);
+    }
+
+    // Update IDs
+    if (mysql_query(con, "SET @count = 0;"))
+    {
+        finish_with_error(con);
+    }
+
+    if (mysql_query(con, "UPDATE transactions SET id = @count:= @count + 1;"))
+    {
+        finish_with_error(con);
+    }
+
+    if (mysql_query(con, "ALTER TABLE transactions AUTO_INCREMENT = 1;"))
+    {
+        finish_with_error(con);
+    }
+
+    // Commit transaction
+    if (mysql_query(con, "COMMIT;"))
+    {
+        finish_with_error(con);
+    }
+
+    std::cout << "Transaction deleted and IDs updated successfully." << std::endl;
 }
 
 void update_transaction(MYSQL *con, int id, const std::string &description, double amount, const std::string &transaction_type)
@@ -239,34 +298,50 @@ int main()
             }
             break;
         case 2:
-            showAccountingMenu();
-            int accountingChoice;
-            std::cin >> accountingChoice;
-            switch (accountingChoice)
+            while (true) // 添加循环以处理无效输入
             {
-            case 1:
-            case 2:
-            {
-                std::string description, transaction_type;
-                double amount;
-                std::cout << "Enter description: ";
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::getline(std::cin, description);
-                std::cout << "Enter amount: ";
-                std::cin >> amount;
-                if (!is_valid_amount(amount))
+                showAccountingMenu();
+                int accountingChoice;
+                std::cin >> accountingChoice;
+                if (std::cin.fail())
                 {
-                    std::cerr << "Invalid amount. It must be a positive number." << std::endl;
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cerr << "Invalid input. Please enter a number." << std::endl;
+                    continue;
+                }
+                switch (accountingChoice)
+                {
+                case 1:
+                case 2:
+                {
+                    std::string description, transaction_type;
+                    double amount;
+                    std::cout << "Enter description: ";
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::getline(std::cin, description);
+                    if (description.empty())
+                    {
+                        std::cerr << "Invalid description. It cannot be empty." << std::endl;
+                        continue;
+                    }
+                    std::cout << "Enter amount: ";
+                    std::cin >> amount;
+                    if (!is_valid_amount(amount))
+                    {
+                        std::cerr << "Invalid amount. It must be a positive number." << std::endl;
+                        continue;
+                    }
+                    transaction_type = (accountingChoice == 1) ? "income" : "expense";
+                    insert_transaction(con, description, amount, transaction_type);
                     break;
                 }
-                transaction_type = (accountingChoice == 1) ? "income" : "expense";
-                insert_transaction(con, description, amount, transaction_type);
-                break;
-            }
-            case 3:
-                continue;
-            default:
-                std::cerr << "Invalid choice" << std::endl;
+                case 3:
+                    break;
+                default:
+                    std::cerr << "Invalid choice" << std::endl;
+                    continue;
+                }
                 break;
             }
             break;
