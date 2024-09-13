@@ -56,6 +56,6 @@ bool is_valid_amount(double amount)
 
 bool is_valid_date(const std::string &date)
 {
-    std::regex date_regex(R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})");
+    std::regex date_regex(R"(\d{4}-\d{2}-\d{2})");
     return std::regex_match(date, date_regex);
 }

@@ -4,9 +4,9 @@ void showMainMenu()
 {
     system("clear");
     printf(" \n");
-    printf("  --------------\n");
-    printf(" <  Hello! >\n");
-    printf("  --------------\n");
+    printf("  -----------------------------------\n");
+    printf(" <  Ready to manage your finances? >\n");
+    printf("  -----------------------------------\n");
     printf("         \\   ^__^\n");
     printf("          \\  (oo)\\_______\n");
     printf("             (__)\\       )\\/\\\n");
@@ -20,7 +20,7 @@ void showMainMenu()
     std::cout << "          4.Update Transaction    " << std::endl;
     std::cout << "          5.Exit                  " << std::endl;
     std::cout << "----------------------------------" << std::endl;
-    std::cout << "Choose an option" << std::endl;
+    std::cout << "Choose an option(1~5)" << std::endl;
 }
 
 void showAccountingMenu()
@@ -41,9 +41,12 @@ void showQueryMenu()
     std::cout << "          1.Counting of all accounts             " << std::endl;
     std::cout << "          2.Counting incomes                     " << std::endl;
     std::cout << "          3.Counting expenses                    " << std::endl;
-    std::cout << "          4.Back to Menu                         " << std::endl;
+    std::cout << "          4.Sorting by amount                    " << std::endl;
+    std::cout << "          5.Search by date                       " << std::endl;
+    std::cout << "          6.Calculate balance                      " << std::endl;
+    std::cout << "          7.Back to Menu                         " << std::endl;
     std::cout << "-------------------------------------------------" << std::endl;
-    std::cout << "Please choose:(1~4)" << std::endl;
+    std::cout << "Please choose:(1~6)" << std::endl;
 }
 
 void back_to_menu()
