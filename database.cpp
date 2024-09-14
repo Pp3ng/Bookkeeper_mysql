@@ -269,16 +269,15 @@ void search_transactions_by_date(MYSQL *con)
 void print_transactions(MYSQL_RES *result)
 {
     MYSQL_ROW row;
-
     // Print table header
-    std::cout << "+----+---------------------+---------------+------------------------+-------------------------+" << std::endl;
+    std::cout << "+----+---------------------+---------------+------------------------+--------------------------------+" << std::endl;
     std::cout << "| " << std::setw(4) << "id"
               << " | " << std::setw(19) << "description"
               << " | " << std::setw(13) << "amount"
               << " | " << std::setw(22) << "transaction_type"
-              << " | " << std::setw(23) << "transaction_date"
+              << " | " << std::setw(28) << "transaction_date"
               << " |" << std::endl;
-    std::cout << "+----+---------------------+---------------+------------------------+-------------------------+" << std::endl;
+    std::cout << "+----+---------------------+---------------+------------------------+--------------------------------+" << std::endl;
 
     // Print table rows
     while ((row = mysql_fetch_row(result)))
@@ -287,11 +286,12 @@ void print_transactions(MYSQL_RES *result)
                   << std::setw(19) << (row[1] ? row[1] : "NULL") << " | "
                   << std::setw(13) << (row[2] ? row[2] : "NULL") << " | "
                   << std::setw(22) << (row[3] ? row[3] : "NULL") << " | "
-                  << std::setw(23) << (row[4] ? row[4] : "NULL") << " |"
+                  << std::setw(28) << (row[4] ? row[4] : "NULL") << " |"
                   << std::endl;
     }
 
-    std::cout << "+----+---------------------+---------------+------------------------+-------------------------+" << std::endl;
+    std::cout << "+----+---------------------+---------------+------------------------+--------------------------------+" << std::endl;
+    std::cout << mysql_num_rows(result) << "records found." << std::endl;
 }
 
 void query_transactions(MYSQL *con)
