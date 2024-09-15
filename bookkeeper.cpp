@@ -2,25 +2,15 @@
 
 int main(int argc, const char *argv[], const char *envp[])
 {
-    MYSQL *con = mysql_init(nullptr);
-    if (con == nullptr)
-    {
-        std::cerr << "mysql_init() failed" << std::endl;
-        return EXIT_FAILURE;
-    }
+    MYSQL *con = connect_to_database();
 
-    if (mysql_real_connect(con, "localhost", "root", "your_new_password",
-                           "bookkeeper", 0, nullptr, 0) == nullptr)
-    {
-        finish_with_error(con);
-    }
-
-    int choice;
+    int option;
+    
     while (true)
     {
         showMainMenu();
-        std::cin >> choice;
-        if (std::cin.fail() || choice < 1 || choice > 5)
+        std::cin >> option;
+        if (std::cin.fail() || option < 1 || option > 5)
         {
             std::cin.clear();
             std::cout << "Invalid input. Please enter a integer between 1 and 5."
@@ -28,7 +18,7 @@ int main(int argc, const char *argv[], const char *envp[])
             back_to_menu();
             continue;
         }
-        switch (choice)
+        switch (option)
         {
         case 1:
             handle_query_transactions(con);

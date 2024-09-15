@@ -1,5 +1,21 @@
 #include "common.h"
+MYSQL *connect_to_database()
+{
+    MYSQL *con = mysql_init(nullptr);
+    if (con == nullptr)
+    {
+        std::cerr << "mysql_init() failed" << std::endl;
+        return nullptr;
+    }
 
+    if (mysql_real_connect(con, "localhost", "root", "your_new_password",
+                           "bookkeeper", 0, nullptr, 0) == nullptr)
+    {
+        finish_with_error(con);
+    }
+
+    return con;
+}
 void handle_query_transactions(MYSQL *con)
 {
     showQueryMenu();

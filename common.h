@@ -9,6 +9,8 @@
 #include <regex>
 #include <sstream>
 
+// connect to database
+MYSQL *connect_to_database();
 // Menu functions
 void showMainMenu();
 void showAccountingMenu();
