@@ -2,6 +2,10 @@
 
 Bookkeeper is a simple tool to keep track of your books. It is a command line tool that allows you to add, remove, and list books. It also allows you to mark books as read or unread.
 
+Use mysql as the database to store the data.
+
+It's my software engineering course project.
+
 ## Features
 
 - Query transaction records
@@ -20,8 +24,8 @@ Bookkeeper is a simple tool to keep track of your books. It is a command line to
 1. Clone this repository:
 
    ```sh
-   git clone https://github.com/ZH0UU/bookkeeper.git
-   cd bookkeeper
+   git clone https://github.com/ZH0UU/Bookkeeper_mysql.git
+   cd Bookkeeper_mysql
    ```
 
 2. Run the setup script to install dependencies and set up the database:
