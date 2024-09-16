@@ -168,7 +168,7 @@ void handle_update_transaction(MYSQL *con)
         break;
     }
 
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的换行符
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::cout << "Enter new description: ";
     std::getline(std::cin, description);
@@ -180,13 +180,13 @@ void handle_update_transaction(MYSQL *con)
 
         if (std::cin.fail())
         {
-            std::cin.clear();                                                   // 清除错误状态
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 忽略输入流中的剩余字符
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid amount. Please enter a valid number." << std::endl;
             continue;
         }
 
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 忽略输入流中的剩余字符
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         if (!is_valid_amount(amount))
         {
