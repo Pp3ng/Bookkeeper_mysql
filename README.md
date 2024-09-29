@@ -1,8 +1,6 @@
 # Bookkeeper
 
-Bookkeeper is a simple tool to keep track of your books. It is a command line tool that allows you to add, remove, and list books. It also allows you to mark books as read or unread.
-
-Use mysql as the database to store the data.
+Bookkeeper is a simple fiancial management system that allows users to add, remove, and update transaction records. This project uses a MYSQL database to store transaction records and C++ API to interract with database,provides a command-line interface for user interaction.
 
 It's my software engineering course project.
 
@@ -24,7 +22,7 @@ It's my software engineering course project.
 1. Clone this repository:
 
    ```sh
-   git clone https://github.com/ZH0UU/Bookkeeper_mysql.git
+   git clone https://github.com/Pp3ng/Bookkeeper_mysql.git
    cd Bookkeeper_mysql
    ```
 
@@ -57,17 +55,3 @@ It's my software engineering course project.
 - `menus.cpp`: Contains functions for displaying menus.
 - `utilities.cpp`: Contains utility functions.
 - `common.h`: Contains declarations for all functions and necessary headers.
-
-## Contribution
-
-Contributions are welcome! Please fork this repository and submit a pull request.
-
-## License
-
-This project is licensed under the MIT License.
-
-## Author
-
-- [ZH0UU](https://github.com/ZH0UU)
-
-If you have any questions or suggestions, feel free to contact me.
