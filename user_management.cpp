@@ -1,5 +1,4 @@
 #include "common.h"
-#include <openssl/evp.h>
 
 std::string hash_password(const std::string &password) {
     unsigned char hash[EVP_MAX_MD_SIZE];
