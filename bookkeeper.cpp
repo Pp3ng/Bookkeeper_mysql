@@ -12,16 +12,17 @@ int main(int argc, const char *argv[], const char *envp[])
     bool logged_in = false;
     std::string username;
     std::string password;
-    
+
     while (true)
     {
-        if (!logged_in) {
+        if (!logged_in)
+        {
             // Display login/register menu
             std::cout << "1. Login" << std::endl;
             std::cout << "2. Register" << std::endl;
             std::cout << "3. Exit" << std::endl;
             std::cout << "Choose an option: ";
-            
+
             // Input validation for menu choice
             while (!(std::cin >> option) || option < 1 || option > 3)
             {

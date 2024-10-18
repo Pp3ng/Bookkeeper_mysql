@@ -78,7 +78,7 @@ void handle_insert_transaction(MYSQL *con)
     {
         int accountingChoice;
         std::cin >> accountingChoice;
-        if (std::cin.fail() || (accountingChoice != 1 && accountingChoice != 2))
+        if (std::cin.fail() || (accountingChoice != 1 && accountingChoice != 2 && accountingChoice != 3))
         {
             // Handle invalid input
             std::cin.clear();
@@ -238,7 +238,7 @@ void sort_transactions_by_amount(MYSQL *con)
     }
 
     std::string order = (sortOrder == 1) ? "ASC" : "DESC";
-    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) + 
+    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) +
                         " ORDER BY amount " + order;
 
     if (mysql_query(con, query.c_str()))
@@ -281,7 +281,7 @@ void search_transactions_by_date(MYSQL *con)
     }
 
     // Construct the query
-    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) + 
+    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) +
                         " AND transaction_date BETWEEN '" + startDate + "' AND '" + endDate + "'";
 
     // Execute the query
@@ -356,7 +356,7 @@ void query_transactions(MYSQL *con)
 // Function to list all income transactions for the current user
 void list_incomes(MYSQL *con)
 {
-    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) + 
+    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) +
                         " AND transaction_type = 'income'";
     if (mysql_query(con, query.c_str()))
     {
@@ -379,7 +379,7 @@ void list_incomes(MYSQL *con)
 // Function to list all expense transactions for the current user
 void list_expenses(MYSQL *con)
 {
-    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) + 
+    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) +
                         " AND transaction_type = 'expense'";
     if (mysql_query(con, query.c_str()))
     {
@@ -411,7 +411,7 @@ void insert_transaction(MYSQL *con, const std::string &description,
     std::string query = "INSERT INTO transactions (description, amount, "
                         "transaction_type, transaction_date, user_id) VALUES ('" +
                         description + "', " + std::to_string(amount) + ", '" +
-                        transaction_type + "', '" + date + "', " + 
+                        transaction_type + "', '" + date + "', " +
                         std::to_string(current_user_id) + ")";
     if (mysql_query(con, query.c_str()))
     {
@@ -565,25 +565,25 @@ void update_transaction(MYSQL *con, int id, const std::string &description,
     memset(bind, 0, sizeof(bind));
 
     bind[0].buffer_type = MYSQL_TYPE_STRING;
-    bind[0].buffer = (void*)description.c_str();
+    bind[0].buffer = (void *)description.c_str();
     bind[0].buffer_length = description.length();
 
     bind[1].buffer_type = MYSQL_TYPE_DOUBLE;
-    bind[1].buffer = (void*)&amount;
+    bind[1].buffer = (void *)&amount;
 
     bind[2].buffer_type = MYSQL_TYPE_STRING;
-    bind[2].buffer = (void*)transaction_type.c_str();
+    bind[2].buffer = (void *)transaction_type.c_str();
     bind[2].buffer_length = transaction_type.length();
 
     bind[3].buffer_type = MYSQL_TYPE_STRING;
-    bind[3].buffer = (void*)date.c_str();
+    bind[3].buffer = (void *)date.c_str();
     bind[3].buffer_length = date.length();
 
     bind[4].buffer_type = MYSQL_TYPE_LONG;
-    bind[4].buffer = (void*)&id;
+    bind[4].buffer = (void *)&id;
 
     bind[5].buffer_type = MYSQL_TYPE_LONG;
-    bind[5].buffer = (void*)&current_user_id;
+    bind[5].buffer = (void *)&current_user_id;
 
     if (mysql_stmt_bind_param(stmt, bind))
     {
@@ -613,7 +613,7 @@ void update_transaction(MYSQL *con, int id, const std::string &description,
 void calculate_balance(MYSQL *con)
 {
     // Query to get total income
-    std::string income_query = "SELECT SUM(amount) FROM transactions WHERE user_id = " + 
+    std::string income_query = "SELECT SUM(amount) FROM transactions WHERE user_id = " +
                                std::to_string(current_user_id) + " AND transaction_type = 'income'";
     if (mysql_query(con, income_query.c_str()))
     {
@@ -631,7 +631,7 @@ void calculate_balance(MYSQL *con)
     mysql_free_result(result);
 
     // Query to get total expense
-    std::string expense_query = "SELECT SUM(amount) FROM transactions WHERE user_id = " + 
+    std::string expense_query = "SELECT SUM(amount) FROM transactions WHERE user_id = " +
                                 std::to_string(current_user_id) + " AND transaction_type = 'expense'";
     if (mysql_query(con, expense_query.c_str()))
     {
