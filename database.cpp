@@ -301,10 +301,10 @@ void print_transactions(MYSQL_RES *result)
     while ((row = mysql_fetch_row(result)))
     {
         std::cout << "| " << std::setw(3) << (row[0] ? row[0] : "NULL") << " | "
-                  << std::setw(20) << (row[1] ? row[1] : "NULL") << " | "
-                  << std::setw(11) << (row[2] ? row[2] : "NULL") << " | "
-                  << std::setw(8) << (row[3] ? row[3] : "NULL") << " | "
-                  << std::setw(19) << (row[4] ? row[4] : "NULL") << " |"
+                  << std::setw(20) << (row[2] ? row[2] : "NULL") << " | "
+                  << std::setw(11) << (row[3] ? row[3] : "NULL") << " | "
+                  << std::setw(8) << (row[4] ? row[4] : "NULL") << " | "
+                  << std::setw(19) << (row[5] ? row[5] : "NULL") << " |"
                   << std::endl;
     }
 
