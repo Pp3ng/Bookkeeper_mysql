@@ -1,6 +1,9 @@
 #include "common.h"
+
+// Function to establish a connection to the MySQL database
 MYSQL *connect_to_database()
 {
+    // Initialize a MySQL object
     MYSQL *con = mysql_init(nullptr);
     if (con == nullptr)
     {
@@ -8,6 +11,7 @@ MYSQL *connect_to_database()
         return nullptr;
     }
 
+    // Attempt to connect to the database
     if (mysql_real_connect(con, "localhost", "root", "your_new_password",
                            "bookkeeper", 0, nullptr, 0) == nullptr)
     {
@@ -16,6 +20,8 @@ MYSQL *connect_to_database()
 
     return con;
 }
+
+// Function to handle querying transactions
 void handle_query_transactions(MYSQL *con)
 {
     showQueryMenu();
@@ -23,14 +29,17 @@ void handle_query_transactions(MYSQL *con)
     {
         int queryChoice;
 
+        // Get user input for query choice
         std::cin >> queryChoice;
         if (std::cin.fail() || queryChoice < 1 || queryChoice > 7)
         {
+            // Handle invalid input
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid input. Please enter a integer between 1 and 7." << std::endl;
             continue;
         }
+        // Process user's query choice
         switch (queryChoice)
         {
         case 1:
@@ -61,6 +70,7 @@ void handle_query_transactions(MYSQL *con)
     }
 }
 
+// Function to handle inserting a new transaction
 void handle_insert_transaction(MYSQL *con)
 {
     showAccountingMenu();
@@ -70,6 +80,7 @@ void handle_insert_transaction(MYSQL *con)
         std::cin >> accountingChoice;
         if (std::cin.fail() || (accountingChoice != 1 && accountingChoice != 2))
         {
+            // Handle invalid input
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid input. Please enter 1 for income or 2 for expense." << std::endl;
@@ -80,6 +91,7 @@ void handle_insert_transaction(MYSQL *con)
         case 1:
         case 2:
         {
+            // Get transaction details from user
             std::string description, transaction_type;
             double amount;
             std::cout << "Enter description: ";
@@ -112,6 +124,7 @@ void handle_insert_transaction(MYSQL *con)
     }
 }
 
+// Function to handle deleting a transaction
 void handle_delete_transaction(MYSQL *con)
 {
     int id;
@@ -122,6 +135,7 @@ void handle_delete_transaction(MYSQL *con)
         std::cin >> id;
         if (std::cin.fail() || id <= 0)
         {
+            // Handle invalid input
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid ID. It must be a positive integer." << std::endl;
@@ -139,6 +153,7 @@ void handle_delete_transaction(MYSQL *con)
     back_to_menu();
 }
 
+// Function to handle updating a transaction
 void handle_update_transaction(MYSQL *con)
 {
     int id;
@@ -147,6 +162,7 @@ void handle_update_transaction(MYSQL *con)
 
     query_transactions(con);
 
+    // Get transaction ID to update
     while (true)
     {
         std::cout << "Enter transaction ID to update: ";
@@ -170,9 +186,11 @@ void handle_update_transaction(MYSQL *con)
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
+    // Get new description
     std::cout << "Enter new description: ";
     std::getline(std::cin, description);
 
+    // Get new amount
     while (true)
     {
         std::cout << "Enter new amount: ";
@@ -201,6 +219,7 @@ void handle_update_transaction(MYSQL *con)
     back_to_menu();
 }
 
+// Function to sort transactions by amount
 void sort_transactions_by_amount(MYSQL *con)
 {
     int sortOrder;
@@ -238,6 +257,7 @@ void sort_transactions_by_amount(MYSQL *con)
     mysql_free_result(result);
 }
 
+// Function to search transactions by date range
 void search_transactions_by_date(MYSQL *con)
 {
     std::string startDate, endDate;
@@ -284,6 +304,7 @@ void search_transactions_by_date(MYSQL *con)
     mysql_free_result(result);
 }
 
+// Function to print transactions in a formatted table
 void print_transactions(MYSQL_RES *result)
 {
     MYSQL_ROW row;
@@ -312,6 +333,7 @@ void print_transactions(MYSQL_RES *result)
     std::cout << mysql_num_rows(result) << " records found." << std::endl;
 }
 
+// Function to query all transactions for the current user
 void query_transactions(MYSQL *con)
 {
     std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id);
@@ -331,6 +353,7 @@ void query_transactions(MYSQL *con)
     mysql_free_result(result);
 }
 
+// Function to list all income transactions for the current user
 void list_incomes(MYSQL *con)
 {
     std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) + 
@@ -353,6 +376,7 @@ void list_incomes(MYSQL *con)
     back_to_menu();
 }
 
+// Function to list all expense transactions for the current user
 void list_expenses(MYSQL *con)
 {
     std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id) + 
@@ -375,6 +399,7 @@ void list_expenses(MYSQL *con)
     back_to_menu();
 }
 
+// Function to insert a new transaction into the database
 void insert_transaction(MYSQL *con, const std::string &description,
                         double amount, const std::string &transaction_type)
 {
@@ -395,6 +420,7 @@ void insert_transaction(MYSQL *con, const std::string &description,
     std::cout << "Transaction inserted successfully." << std::endl;
 }
 
+// Function to delete a transaction from the database
 void delete_transaction(MYSQL *con, int id)
 {
     std::string query = "DELETE FROM transactions WHERE id = ? AND user_id = ?";
@@ -471,6 +497,7 @@ void delete_transaction(MYSQL *con, int id)
     std::cout << "Transaction deleted and IDs updated successfully." << std::endl;
 }
 
+// Function to update an existing transaction in the database
 void update_transaction(MYSQL *con, int id, const std::string &description,
                         double amount)
 {
@@ -582,8 +609,10 @@ void update_transaction(MYSQL *con, int id, const std::string &description,
     std::cout << "Transaction updated successfully." << std::endl;
 }
 
+// Function to calculate and display the balance
 void calculate_balance(MYSQL *con)
 {
+    // Query to get total income
     std::string income_query = "SELECT SUM(amount) FROM transactions WHERE user_id = " + 
                                std::to_string(current_user_id) + " AND transaction_type = 'income'";
     if (mysql_query(con, income_query.c_str()))
@@ -601,6 +630,7 @@ void calculate_balance(MYSQL *con)
     double totalIncome = row[0] ? std::stod(row[0]) : 0.0;
     mysql_free_result(result);
 
+    // Query to get total expense
     std::string expense_query = "SELECT SUM(amount) FROM transactions WHERE user_id = " + 
                                 std::to_string(current_user_id) + " AND transaction_type = 'expense'";
     if (mysql_query(con, expense_query.c_str()))
@@ -618,8 +648,10 @@ void calculate_balance(MYSQL *con)
     double totalExpense = row[0] ? std::stod(row[0]) : 0.0;
     mysql_free_result(result);
 
+    // Calculate net balance
     double Net = totalIncome - (-totalExpense);
 
+    // Display results
     std::cout << "Total Income: " << totalIncome << std::endl;
     std::cout << "Total Expense: " << totalExpense << std::endl;
     std::cout << "Net (Income - Expense): " << Net << std::endl;

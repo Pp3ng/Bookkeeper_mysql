@@ -1,9 +1,11 @@
 #include "common.h"
 
+// Global variable to store the current user's ID
 int current_user_id = -1;
 
 int main(int argc, const char *argv[], const char *envp[])
 {
+    // Connect to the database
     MYSQL *con = connect_to_database();
 
     int option;
@@ -14,11 +16,13 @@ int main(int argc, const char *argv[], const char *envp[])
     while (true)
     {
         if (!logged_in) {
+            // Display login/register menu
             std::cout << "1. Login" << std::endl;
             std::cout << "2. Register" << std::endl;
             std::cout << "3. Exit" << std::endl;
             std::cout << "Choose an option: ";
             
+            // Input validation for menu choice
             while (!(std::cin >> option) || option < 1 || option > 3)
             {
                 std::cin.clear();
@@ -29,6 +33,7 @@ int main(int argc, const char *argv[], const char *envp[])
             switch (option)
             {
             case 1:
+                // Handle login
                 std::cout << "Enter username: ";
                 std::cin >> username;
                 std::cout << "Enter password: ";
@@ -40,6 +45,7 @@ int main(int argc, const char *argv[], const char *envp[])
                 }
                 break;
             case 2:
+                // Handle registration
                 std::cout << "Enter new username: ";
                 std::cin >> username;
                 std::cout << "Enter new password: ";
@@ -47,6 +53,7 @@ int main(int argc, const char *argv[], const char *envp[])
                 register_user(con, username, password);
                 break;
             case 3:
+                // Exit the program
                 std::cout << "Goodbye!" << std::endl;
                 mysql_close(con);
                 return EXIT_SUCCESS;
@@ -54,6 +61,7 @@ int main(int argc, const char *argv[], const char *envp[])
         }
         else
         {
+            // Display main menu for logged-in users
             showMainMenu();
             std::cin >> option;
             if (std::cin.fail() || option < 1 || option > 6)
@@ -78,11 +86,13 @@ int main(int argc, const char *argv[], const char *envp[])
                 handle_update_transaction(con);
                 break;
             case 5:
+                // Log out
                 logged_in = false;
                 current_user_id = -1;
                 std::cout << "Logged out successfully." << std::endl;
                 break;
             case 6:
+                // Exit the program
                 std::cout << "Goodbye!" << std::endl;
                 mysql_close(con);
                 return EXIT_SUCCESS;
@@ -90,6 +100,7 @@ int main(int argc, const char *argv[], const char *envp[])
         }
     }
 
+    // Close the database connection and exit
     mysql_close(con);
     return EXIT_SUCCESS;
 }

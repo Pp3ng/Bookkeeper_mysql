@@ -40,14 +40,46 @@ std::string hash_password(const std::string &password) {
 bool register_user(MYSQL *con, const std::string &username, const std::string &password) {
     std::string hashed_password = hash_password(password);
     
-    std::string query = "INSERT INTO users (username, password_hash) VALUES ('" + 
-                        username + "', '" + hashed_password + "')";
-
-    if (mysql_query(con, query.c_str())) {
-        std::cerr << "Registration failed: " << mysql_error(con) << std::endl;
+    // Prepare SQL statement
+    const char *query = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt) {
+        std::cerr << "mysql_stmt_init() failed" << std::endl;
         return false;
     }
     
+    if (mysql_stmt_prepare(stmt, query, strlen(query))) {
+        std::cerr << "mysql_stmt_prepare() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+    
+    // Bind parameters
+    MYSQL_BIND bind[2];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (void*)username.c_str();
+    bind[0].buffer_length = username.length();
+
+    bind[1].buffer_type = MYSQL_TYPE_STRING;
+    bind[1].buffer = (void*)hashed_password.c_str();
+    bind[1].buffer_length = hashed_password.length();
+
+    if (mysql_stmt_bind_param(stmt, bind)) {
+        std::cerr << "mysql_stmt_bind_param() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    // Execute the statement
+    if (mysql_stmt_execute(stmt)) {
+        std::cerr << "mysql_stmt_execute() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    mysql_stmt_close(stmt);
     std::cout << "User registered successfully!" << std::endl;
     return true;
 }
@@ -55,22 +87,57 @@ bool register_user(MYSQL *con, const std::string &username, const std::string &p
 bool login_user(MYSQL *con, const std::string &username, const std::string &password) {
     std::string hashed_password = hash_password(password);
     
-    std::string query = "SELECT * FROM users WHERE username = '" + username + 
-                        "' AND password_hash = '" + hashed_password + "'";
+    // Prepare SQL statement
+    const char *query = "SELECT * FROM users WHERE username = ? AND password_hash = ?";
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt) {
+        std::cerr << "mysql_stmt_init() failed" << std::endl;
+        return false;
+    }
+    
+    if (mysql_stmt_prepare(stmt, query, strlen(query))) {
+        std::cerr << "mysql_stmt_prepare() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+    
+    // Bind parameters
+    MYSQL_BIND bind[2];
+    memset(bind, 0, sizeof(bind));
 
-    if (mysql_query(con, query.c_str())) {
-        std::cerr << "Login query failed: " << mysql_error(con) << std::endl;
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (void*)username.c_str();
+    bind[0].buffer_length = username.length();
+
+    bind[1].buffer_type = MYSQL_TYPE_STRING;
+    bind[1].buffer = (void*)hashed_password.c_str();
+    bind[1].buffer_length = hashed_password.length();
+
+    if (mysql_stmt_bind_param(stmt, bind)) {
+        std::cerr << "mysql_stmt_bind_param() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
         return false;
     }
 
-    MYSQL_RES *result = mysql_store_result(con);
-    if (result == nullptr) {
-        std::cerr << "Failed to get result: " << mysql_error(con) << std::endl;
+    // Execute the statement
+    if (mysql_stmt_execute(stmt)) {
+        std::cerr << "mysql_stmt_execute() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
         return false;
     }
 
-    bool login_success = (mysql_num_rows(result) == 1);
-    mysql_free_result(result);
+    // Store the result
+    if (mysql_stmt_store_result(stmt)) {
+        std::cerr << "mysql_stmt_store_result() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    // Check if a matching user was found
+    bool login_success = (mysql_stmt_num_rows(stmt) == 1);
+
+    mysql_stmt_free_result(stmt);
+    mysql_stmt_close(stmt);
 
     if (login_success) {
         std::cout << "Login successful!" << std::endl;

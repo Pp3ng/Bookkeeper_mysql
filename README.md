@@ -65,6 +65,5 @@ It's my software engineering course project.
 ## Security
 
 - User passwords are hashed using SHA-256 before being stored in the database.
+- Prepared statements are used to prevent SQL injection attacks.
 - Each user can only access their own transaction records.
-
-
