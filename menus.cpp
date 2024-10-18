@@ -18,18 +18,19 @@ void showMainMenu()
     std::cout << "          2.Insert Transaction    " << std::endl;
     std::cout << "          3.Delete Transaction    " << std::endl;
     std::cout << "          4.Update Transaction    " << std::endl;
-    std::cout << "          5.Exit                  " << std::endl;
+    std::cout << "          5.Logout                " << std::endl;
+    std::cout << "          6.Exit                  " << std::endl;
     std::cout << "----------------------------------" << std::endl;
-    std::cout << "Choose an option(1~5)" << std::endl;
+    std::cout << "Choose an option(1~6)" << std::endl;
 }
 
 void showAccountingMenu()
 {
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << "|========Please choose bookkeeping type=========|" << std::endl;
-    std::cout << "          1.Income                               " << std::endl;
-    std::cout << "          2.Expense                              " << std::endl;
-    std::cout << "          3.Back to Menu                         " << std::endl;
+    std::cout << "           1.Income                               " << std::endl;
+    std::cout << "           2.Expense                              " << std::endl;
+    std::cout << "           3.Back to Menu                         " << std::endl;
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << "Please choose:(1~3)" << std::endl;
 }
@@ -38,13 +39,13 @@ void showQueryMenu()
 {
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << "|===========Please choose Query type============|" << std::endl;
-    std::cout << "          1.Counting of all accounts             " << std::endl;
-    std::cout << "          2.Counting incomes                     " << std::endl;
-    std::cout << "          3.Counting expenses                    " << std::endl;
-    std::cout << "          4.Sorting by amount                    " << std::endl;
-    std::cout << "          5.Search by date                       " << std::endl;
-    std::cout << "          6.Calculate balance                      " << std::endl;
-    std::cout << "          7.Back to Menu                         " << std::endl;
+    std::cout << "           1.Counting of all accounts             " << std::endl;
+    std::cout << "           2.Counting incomes                     " << std::endl;
+    std::cout << "           3.Counting expenses                    " << std::endl;
+    std::cout << "           4.Sorting by amount                    " << std::endl;
+    std::cout << "           5.Search by date                       " << std::endl;
+    std::cout << "           6.Calculate balance                      " << std::endl;
+    std::cout << "           7.Back to Menu                         " << std::endl;
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << "Please choose:(1~6)" << std::endl;
 }

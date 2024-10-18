@@ -8,6 +8,8 @@
 #include <mysql/mysql.h>
 #include <regex>
 #include <sstream>
+#include <cstring>
+#include <openssl/evp.h>
 
 // connect to database
 MYSQL *connect_to_database();
@@ -41,4 +43,14 @@ void update_transaction(MYSQL *con, int id, const std::string &description, doub
 void sort_transactions_by_amount(MYSQL *con);
 void search_transactions_by_date(MYSQL *con);
 void calculate_balance(MYSQL *con);
+
+// User management functions
+bool register_user(MYSQL *con, const std::string &username, const std::string &password);
+bool login_user(MYSQL *con, const std::string &username, const std::string &password);
+int get_user_id(MYSQL *con, const std::string &username);
+std::string hash_password(const std::string &password);
+
+// Global variables to store the current user id
+extern int current_user_id;
+
 #endif // COMMON_H

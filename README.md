@@ -1,21 +1,25 @@
 # Bookkeeper
 
-Bookkeeper is a simple fiancial management system that allows users to add, remove, and update transaction records. This project uses a MYSQL database to store transaction records and C++ API to interract with database,provides a command-line interface for user interaction.
+Bookkeeper is a simple financial management system that allows users to add, remove, and update transaction records. This project uses a MySQL database to store transaction records and user information, and provides a command-line interface for user interaction.
 
 It's my software engineering course project.
 
 ## Features
 
+- User registration and login
 - Query transaction records
 - Insert new transactions
 - Delete transactions
 - Update transactions
 - Calculate balance
+- Sort transactions by amount
+- Search transactions by date
 
 ## Dependencies
 
 - MySQL
-- C++ compiler
+- C++ compiler (supporting C++11 or later)
+- OpenSSL library
 
 ## Installation
 
@@ -46,7 +50,8 @@ It's my software engineering course project.
    ./bookkeeper
    ```
 
-3. Follow the on-screen prompts to interact with the system.
+3. Follow the on-screen prompts to register a new user or log in.
+4. Once logged in, use the main menu to interact with the system.
 
 ## File Structure
 
@@ -54,4 +59,12 @@ It's my software engineering course project.
 - `database.cpp`: Contains functions for database interactions.
 - `menus.cpp`: Contains functions for displaying menus.
 - `utilities.cpp`: Contains utility functions.
+- `user_management.cpp`: Contains functions for user registration, login, and password hashing.
 - `common.h`: Contains declarations for all functions and necessary headers.
+
+## Security
+
+- User passwords are hashed using SHA-256 before being stored in the database.
+- Each user can only access their own transaction records.
+
+

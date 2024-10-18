@@ -2,10 +2,10 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -std=c++11 -Wall -I/usr/include/mysql
+CXXFLAGS = -std=c++11 -Wall -I/usr/include/mysql -I/usr/include/openssl
 
 # Linker flags
-LDFLAGS = -L/usr/lib/mysql -lmysqlclient
+LDFLAGS = -L/usr/lib/mysql -lmysqlclient -lcrypto -lssl
 
 # Source files (automatically detect all .cpp files)
 SRCS = $(wildcard *.cpp)
