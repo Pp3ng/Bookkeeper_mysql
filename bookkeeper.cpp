@@ -18,7 +18,13 @@ int main(int argc, const char *argv[], const char *envp[])
             std::cout << "2. Register" << std::endl;
             std::cout << "3. Exit" << std::endl;
             std::cout << "Choose an option: ";
-            std::cin >> option;
+            
+            while (!(std::cin >> option) || option < 1 || option > 3)
+            {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid input. Please enter 1, 2, or 3: ";
+            }
 
             switch (option)
             {
@@ -44,8 +50,6 @@ int main(int argc, const char *argv[], const char *envp[])
                 std::cout << "Goodbye!" << std::endl;
                 mysql_close(con);
                 return EXIT_SUCCESS;
-            default:
-                std::cout << "Invalid option. Please try again." << std::endl;
             }
         }
         else

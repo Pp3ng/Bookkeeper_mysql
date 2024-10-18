@@ -427,10 +427,18 @@ void delete_transaction(MYSQL *con, int id)
 
     if (mysql_stmt_execute(stmt))
     {
+        mysql_stmt_close(stmt);
         finish_with_error(con);
     }
 
+    my_ulonglong affected_rows = mysql_stmt_affected_rows(stmt);
     mysql_stmt_close(stmt);
+
+    if (affected_rows == 0)
+    {
+        std::cout << "Error: No transaction found with the specified ID or it doesn't belong to you. No deletion performed." << std::endl;
+        return;
+    }
 
     // Start transaction
     if (mysql_query(con, "START TRANSACTION;"))
@@ -509,18 +517,66 @@ void update_transaction(MYSQL *con, int id, const std::string &description,
         amount = -amount;
     }
 
-    // Construct the SQL query for updating the transaction
-    std::string query = "UPDATE transactions SET description = '" + description +
-                        "', amount = " + std::to_string(amount) +
-                        ", transaction_type = '" + transaction_type +
-                        "', transaction_date = '" + date +
-                        "' WHERE id = " + std::to_string(id) +
-                        " AND user_id = " + std::to_string(current_user_id);
+    // Prepare the SQL query for updating the transaction
+    std::string query = "UPDATE transactions SET description = ?, amount = ?, "
+                        "transaction_type = ?, transaction_date = ? "
+                        "WHERE id = ? AND user_id = ?";
 
-    // Execute the query and handle any errors
-    if (mysql_query(con, query.c_str()))
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt)
     {
         finish_with_error(con);
+    }
+
+    if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+    {
+        mysql_stmt_close(stmt);
+        finish_with_error(con);
+    }
+
+    MYSQL_BIND bind[6];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (void*)description.c_str();
+    bind[0].buffer_length = description.length();
+
+    bind[1].buffer_type = MYSQL_TYPE_DOUBLE;
+    bind[1].buffer = (void*)&amount;
+
+    bind[2].buffer_type = MYSQL_TYPE_STRING;
+    bind[2].buffer = (void*)transaction_type.c_str();
+    bind[2].buffer_length = transaction_type.length();
+
+    bind[3].buffer_type = MYSQL_TYPE_STRING;
+    bind[3].buffer = (void*)date.c_str();
+    bind[3].buffer_length = date.length();
+
+    bind[4].buffer_type = MYSQL_TYPE_LONG;
+    bind[4].buffer = (void*)&id;
+
+    bind[5].buffer_type = MYSQL_TYPE_LONG;
+    bind[5].buffer = (void*)&current_user_id;
+
+    if (mysql_stmt_bind_param(stmt, bind))
+    {
+        mysql_stmt_close(stmt);
+        finish_with_error(con);
+    }
+
+    if (mysql_stmt_execute(stmt))
+    {
+        mysql_stmt_close(stmt);
+        finish_with_error(con);
+    }
+
+    my_ulonglong affected_rows = mysql_stmt_affected_rows(stmt);
+    mysql_stmt_close(stmt);
+
+    if (affected_rows == 0)
+    {
+        std::cout << "Error: No transaction found with the specified ID or it doesn't belong to you. No update performed." << std::endl;
+        return;
     }
 
     std::cout << "Transaction updated successfully." << std::endl;
