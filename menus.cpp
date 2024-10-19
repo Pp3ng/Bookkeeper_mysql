@@ -18,10 +18,14 @@ void showMainMenu()
     std::cout << "          2.Insert Transaction    " << std::endl;
     std::cout << "          3.Delete Transaction    " << std::endl;
     std::cout << "          4.Update Transaction    " << std::endl;
-    std::cout << "          5.Logout                " << std::endl;
-    std::cout << "          6.Exit                  " << std::endl;
+    std::cout << "          5.Set Budget            " << std::endl;
+    std::cout << "          6.Check Budget          " << std::endl;
+    std::cout << "          7.Export Transactions   " << std::endl;
+    std::cout << "          8.Reset Password        " << std::endl;
+    std::cout << "          9.Logout                " << std::endl;
+    std::cout << "          10.Exit                 " << std::endl;
     std::cout << "----------------------------------" << std::endl;
-    std::cout << "Choose an option(1~6)" << std::endl;
+    std::cout << "Choose an option(1~10)" << std::endl;
 }
 
 void showAccountingMenu()

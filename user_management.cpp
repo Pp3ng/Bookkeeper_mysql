@@ -273,3 +273,55 @@ int get_user_id(MYSQL *con, const std::string &username)
 
     return user_id;
 }
+
+bool reset_password(MYSQL *con, const std::string &username, const std::string &new_password)
+{
+    std::string hashed_password = hash_password(new_password);
+
+    // Prepare SQL statement
+    const char *query = "UPDATE users SET password_hash = ? WHERE username = ?";
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt)
+    {
+        std::cerr << "mysql_stmt_init() failed" << std::endl;
+        return false;
+    }
+
+    if (mysql_stmt_prepare(stmt, query, strlen(query)))
+    {
+        std::cerr << "mysql_stmt_prepare() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    // Bind parameters
+    MYSQL_BIND bind[2];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (void *)hashed_password.c_str();
+    bind[0].buffer_length = hashed_password.length();
+
+    bind[1].buffer_type = MYSQL_TYPE_STRING;
+    bind[1].buffer = (void *)username.c_str();
+    bind[1].buffer_length = username.length();
+
+    if (mysql_stmt_bind_param(stmt, bind))
+    {
+        std::cerr << "mysql_stmt_bind_param() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    // Execute the statement
+    if (mysql_stmt_execute(stmt))
+    {
+        std::cerr << "mysql_stmt_execute() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    mysql_stmt_close(stmt);
+    std::cout << "Password reset successful!" << std::endl;
+    return true;
+}

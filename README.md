@@ -1,7 +1,6 @@
 # Bookkeeper
 
-Bookkeeper is a simple financial management system that allows users to add, remove, and update transaction records. This project uses a MySQL database to store transaction records and user information, and provides a
-`user-friendly` command-line interface for user interaction.
+Bookkeeper is a simple financial management system that allows users to add, remove, and update transaction records. This project uses a MySQL database to store transaction records and user information, and provides a `user-friendly` command-line interface for user interaction.
 
 It's my software engineering course project.
 
@@ -15,6 +14,10 @@ It's my software engineering course project.
 - Calculate balance
 - Sort transactions by amount
 - Search transactions by date
+- Set budget
+- Check budget
+- Export transactions to CSV file
+- Reset password
 
 ## Dependencies
 

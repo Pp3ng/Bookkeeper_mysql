@@ -34,6 +34,7 @@ int main(int argc, const char *argv[], const char *envp[])
             switch (option)
             {
             case 1:
+            {
                 // Handle login
                 std::cout << "Enter username: ";
                 std::cin >> username;
@@ -45,7 +46,9 @@ int main(int argc, const char *argv[], const char *envp[])
                     current_user_id = get_user_id(con, username);
                 }
                 break;
+            }
             case 2:
+            {
                 // Handle registration
                 std::cout << "Enter new username: ";
                 std::cin >> username;
@@ -53,11 +56,14 @@ int main(int argc, const char *argv[], const char *envp[])
                 std::cin >> password;
                 register_user(con, username, password);
                 break;
+            }
             case 3:
+            {
                 // Exit the program
                 std::cout << "Goodbye!" << std::endl;
                 mysql_close(con);
                 return EXIT_SUCCESS;
+            }
             }
         }
         else
@@ -65,10 +71,10 @@ int main(int argc, const char *argv[], const char *envp[])
             // Display main menu for logged-in users
             showMainMenu();
             std::cin >> option;
-            if (std::cin.fail() || option < 1 || option > 6)
+            if (std::cin.fail() || option < 1 || option > 10)
             {
                 std::cin.clear();
-                std::cout << "Invalid input. Please enter an integer between 1 and 6." << std::endl;
+                std::cout << "Invalid input. Please enter an integer between 1 and 10." << std::endl;
                 back_to_menu();
                 continue;
             }
@@ -87,16 +93,48 @@ int main(int argc, const char *argv[], const char *envp[])
                 handle_update_transaction(con);
                 break;
             case 5:
+            {
+                double budget;
+                std::cout << "Enter budget amount: ";
+                std::cin >> budget;
+                set_budget(con, budget);
+                break;
+            }
+            case 6:
+                check_budget(con);
+                back_to_menu();
+                break;
+            case 7:
+            {
+                std::string filename;
+                std::cout << "Enter filename to export transactions: ";
+                std::cin >> filename;
+                export_transactions_to_csv(con, filename);
+                break;
+            }
+            case 8:
+            {
+                std::string new_password;
+                std::cout << "Enter new password: ";
+                std::cin >> new_password;
+                reset_password(con, username, new_password);
+                break;
+            }
+            case 9:
+            {
                 // Log out
                 logged_in = false;
                 current_user_id = -1;
                 std::cout << "Logged out successfully." << std::endl;
                 break;
-            case 6:
+            }
+            case 10:
+            {
                 // Exit the program
                 std::cout << "Goodbye!" << std::endl;
                 mysql_close(con);
                 return EXIT_SUCCESS;
+            }
             }
         }
     }

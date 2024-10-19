@@ -10,6 +10,7 @@
 #include <sstream>
 #include <cstring>
 #include <openssl/evp.h>
+#include <fstream> 
 
 // connect to database
 MYSQL *connect_to_database();
@@ -49,6 +50,14 @@ bool register_user(MYSQL *con, const std::string &username, const std::string &p
 bool login_user(MYSQL *con, const std::string &username, const std::string &password);
 int get_user_id(MYSQL *con, const std::string &username);
 std::string hash_password(const std::string &password);
+bool reset_password(MYSQL *con, const std::string &username, const std::string &new_password);
+
+// Budget functions
+void set_budget(MYSQL *con, double budget);
+void check_budget(MYSQL *con);
+
+// Export function
+void export_transactions_to_csv(MYSQL *con, const std::string &filename);
 
 // Global variables to store the current user id
 extern int current_user_id;

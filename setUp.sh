@@ -37,11 +37,19 @@ CREATE TABLE IF NOT EXISTS transactions (
     transaction_date DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS budgets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    amount DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE KEY unique_user_budget (user_id)
+);
 EOF
 
 # Compile the project
-g++ -std=c++11 -Wall -I/usr/include/mysql -I/usr/include/openssl \
-    bookkeeper.cpp database.cpp menus.cpp utilities.cpp user_management.cpp \
-    -o bookkeeper -L/usr/lib/mysql -lmysqlclient -lcrypto -lssl
+make
 
 echo "Setup complete! You can now run the application with ./bookkeeper"

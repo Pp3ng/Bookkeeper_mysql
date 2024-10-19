@@ -656,3 +656,218 @@ void calculate_balance(MYSQL *con)
     std::cout << "Total Expense: " << totalExpense << std::endl;
     std::cout << "Net (Income - Expense): " << Net << std::endl;
 }
+
+void export_transactions_to_csv(MYSQL *con, const std::string &filename)
+{
+    std::string query = "SELECT * FROM transactions WHERE user_id = " + std::to_string(current_user_id);
+    if (mysql_query(con, query.c_str()))
+    {
+        finish_with_error(con);
+    }
+
+    MYSQL_RES *result = mysql_store_result(con);
+    if (result == nullptr)
+    {
+        finish_with_error(con);
+    }
+
+    std::ofstream outfile(filename);
+    if (!outfile.is_open())
+    {
+        std::cerr << "Failed to open file for writing: " << filename << std::endl;
+        mysql_free_result(result);
+        return;
+    }
+
+    MYSQL_FIELD *fields = mysql_fetch_fields(result);
+    int num_fields = mysql_num_fields(result);
+
+    for (int i = 0; i < num_fields; i++)
+    {
+        outfile << fields[i].name;
+        if (i < num_fields - 1)
+            outfile << ",";
+    }
+    outfile << "\n";
+
+    MYSQL_ROW row;
+    MYSQL_BIND *row_bind = new MYSQL_BIND[num_fields];
+    memset(row_bind, 0, sizeof(MYSQL_BIND) * num_fields);
+
+    char **row_data = new char *[mysql_num_fields(result)];
+    unsigned long *lengths = new unsigned long[mysql_num_fields(result)];
+    bool *is_null = new bool[mysql_num_fields(result)];
+
+    for (unsigned int i = 0; i < mysql_num_fields(result); i++)
+    {
+        row_data[i] = new char[1024];
+        row_bind[i].buffer_type = MYSQL_TYPE_STRING;
+        row_bind[i].buffer = row_data[i];
+        row_bind[i].buffer_length = 1024;
+        row_bind[i].length = &lengths[i];
+        row_bind[i].is_null = &is_null[i];
+    }
+
+    while ((row = mysql_fetch_row(result)))
+    {
+        for (int i = 0; i < num_fields; i++)
+        {
+            if (row[i])
+                outfile << row[i];
+            if (i < num_fields - 1)
+                outfile << ",";
+        }
+        outfile << "\n";
+    }
+
+    outfile.close();
+    std::cout << "Transactions exported to " << filename << " successfully." << std::endl;
+
+    for (unsigned int i = 0; i < mysql_num_fields(result); i++)
+    {
+        delete[] row_data[i];
+    }
+    delete[] row_data;
+    delete[] lengths;
+    delete[] is_null;
+    delete[] row_bind;
+
+    mysql_free_result(result);
+    back_to_menu();
+}
+// Function to set the budget for the current user
+void set_budget(MYSQL *con, double budget)
+{
+    std::string query = "INSERT INTO budgets (user_id, amount) VALUES (?, ?) "
+                        "ON DUPLICATE KEY UPDATE amount = ?";
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt)
+    {
+        finish_with_error(con);
+    }
+
+    if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+    {
+        mysql_stmt_close(stmt);
+        finish_with_error(con);
+    }
+
+    MYSQL_BIND bind[3];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_LONG;
+    bind[0].buffer = (void *)&current_user_id;
+
+    bind[1].buffer_type = MYSQL_TYPE_DOUBLE;
+    bind[1].buffer = (void *)&budget;
+
+    bind[2].buffer_type = MYSQL_TYPE_DOUBLE;
+    bind[2].buffer = (void *)&budget;
+
+    if (mysql_stmt_bind_param(stmt, bind))
+    {
+        mysql_stmt_close(stmt);
+        finish_with_error(con);
+    }
+
+    if (mysql_stmt_execute(stmt))
+    {
+        mysql_stmt_close(stmt);
+        finish_with_error(con);
+    }
+
+    mysql_stmt_close(stmt);
+    std::cout << "Budget set successfully." << std::endl;
+    back_to_menu();
+}
+// Function to check the budget for the current user
+void check_budget(MYSQL *con)
+{
+    std::string query = "SELECT b.amount, COALESCE(SUM(ABS(t.amount)), 0) as total_expense "
+                        "FROM budgets b "
+                        "LEFT JOIN transactions t ON b.user_id = t.user_id AND t.transaction_type = 'expense' "
+                        "WHERE b.user_id = ? "
+                        "GROUP BY b.user_id, b.amount"; // Prepare the SQL statement
+    MYSQL_STMT *stmt = mysql_stmt_init(con);
+    if (!stmt)
+    {
+        finish_with_error(con);
+    }
+
+    if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+    {
+        std::cerr << "mysql_stmt_prepare() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return;
+    }
+
+    MYSQL_BIND bind[1];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_LONG;
+    bind[0].buffer = (void *)&current_user_id;
+
+    if (mysql_stmt_bind_param(stmt, bind))
+    {
+        std::cerr << "mysql_stmt_bind_param() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return;
+    }
+
+    if (mysql_stmt_execute(stmt))
+    {
+        std::cerr << "mysql_stmt_execute() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return;
+    }
+
+    MYSQL_BIND result[2];
+    double budget, total_expense;
+    bool is_null[2];
+    unsigned long length[2];
+    memset(result, 0, sizeof(result));
+
+    result[0].buffer_type = MYSQL_TYPE_DOUBLE;
+    result[0].buffer = (void *)&budget;
+    result[0].is_null = &is_null[0];
+    result[0].length = &length[0];
+
+    result[1].buffer_type = MYSQL_TYPE_DOUBLE;
+    result[1].buffer = (void *)&total_expense;
+    result[1].is_null = &is_null[1];
+    result[1].length = &length[1];
+
+    if (mysql_stmt_bind_result(stmt, result))
+    {
+        std::cerr << "mysql_stmt_bind_result() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return;
+    }
+
+    int fetch_result = mysql_stmt_fetch(stmt);
+    if (fetch_result == MYSQL_NO_DATA)
+    {
+        std::cout << "No budget set. Please set a budget first." << std::endl;
+        mysql_stmt_close(stmt);
+        return;
+    }
+    else if (fetch_result != 0)
+    {
+        std::cerr << "mysql_stmt_fetch() failed: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return;
+    }
+
+    mysql_stmt_close(stmt);
+
+    if (is_null[0])
+    {
+        std::cout << "No budget set. Please set a budget first." << std::endl;
+    }
+    else
+    {
+        std::cout << "Budget: " << budget << std::endl;
+        std::cout << "Total Expense: " << (is_null[1] ? 0 : total_expense) << std::endl;
+        std::cout << "Remaining Budget: " << (budget - (is_null[1] ? 0 : total_expense)) << std::endl;
+    }
+}
